@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "rcfc8eIthKB/XX4SsHFFge5LCmfnl16Cb2R5JB3pwYk=",
+  "Source": "dotnetmovieportal",
+  "BasePath": "_content/dotnetmovieportal",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
