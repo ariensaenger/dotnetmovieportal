@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using dotnetmovieportal.Dtos;
+using dotnetmovieportal.Models;
+using dotnetmovieportal.Scripts;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -6,76 +9,101 @@ namespace dotnetmovieportal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes("application/json")]  
     public class MovieController : ControllerBase
     {
 
-        private static List<Movie> movies = new List<Movie>
-            {
-                new Movie { Id = 1, Name = "Avatar", Description = "Lorem", ReleaseYear = 2009}
-            };
+        
+        private readonly DataContext _context;
 
+        public MovieController(DataContext context)
+        {
+            this._context = context;
+        }
 
         // GET: api/<MovieController>
         [HttpGet]
-        public async Task<ActionResult<List<Movie>>> Get()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<MovieDto>>> Get()
         {
-          
+            var movies = (await _context.Movies.ToListAsync()).Select(movie => movie.asDto());
 
             return Ok(movies);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Movie>> Get(int id)
+        public async Task<ActionResult<MovieDto>> GetById(Guid id)
         {
-            var movie = movies.Find(m => m.Id == id);
+            var movie = await _context.Movies.FindAsync(id);
 
             if (movie == null)
             {
-                return BadRequest("Movie not found.");
+                return NotFound("Movie not found.");
             }
 
-            return Ok(movie);
+            return Ok(movie.asDto());
         }
 
 
         // POST api/<MovieController>
         [HttpPost]
-        public async Task<ActionResult<List<Movie>>> AddMovie([FromBody] Movie movie)
+        public async Task<ActionResult<List<MovieDto>>> AddMovie([FromBody] CreateMovieDto createdMovie)
         {
-            movies.Add(movie);
-            return Ok(movies);  
+            var movie = new Movie(Guid.NewGuid(), createdMovie.Name, createdMovie.Description, createdMovie.ReleaseYear);
+
+            _context.Movies.Add(movie);
+            await _context.SaveChangesAsync(); 
+
+            //BadRequest When Failure 
+
+            return CreatedAtAction(nameof(GetById), new {id = movie.Id}, movie);  
         }
 
         // PUT api/<MovieController>/5
-        [HttpPut]
-        public async Task<ActionResult<List<Movie>>> UpdateMovie(Movie request)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<List<MovieDto>>> UpdateMovie(Guid id,UpdateMovieDto request)
         {
-            var movie = movies.Find(movie => movie.Id == request.Id);
+            var dbexistingmovie = await _context.Movies.FindAsync(id);
 
-            if (movie == null)
-                return BadRequest("Movie not found.");
+            if (dbexistingmovie == null)
+            {
+                return NotFound("Movie not found.");
+            }
 
-            movie.ReleaseYear = request.ReleaseYear;
-            movie.Name = request.Name;
-            movie.Description = request.Description;
+
+
+
+            dbexistingmovie.Name = request.Name;
+            dbexistingmovie.Description = request.Description;
+            dbexistingmovie.ReleaseYear = request.ReleaseYear;
+
             
-            return Ok(movies);
+
+
+            await _context.SaveChangesAsync(); 
+
+            return Ok((await _context.Movies.ToListAsync()).Select(movie => movie.asDto()));
         }
-        
-        
+
+
 
         // DELETE api/<MovieController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<List<Movie>>> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var movie = movies.Find(movie => movie.Id == id);
+            var dbexistingmovie = await _context.Movies.FindAsync(id);
 
-            if (movie == null)
+            if (dbexistingmovie == null)
+            {
                 return BadRequest("Movie not found.");
+            }
 
-            movies.Remove(movie);
 
-            return Ok(movies);
+            _context.Movies.Remove(dbexistingmovie);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

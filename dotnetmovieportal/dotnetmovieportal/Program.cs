@@ -1,6 +1,7 @@
 
 
 global using dotnetmovieportal.Data;
+global using dotnetmovieportal.Models;
 global using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
