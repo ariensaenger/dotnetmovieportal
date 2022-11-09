@@ -12,8 +12,8 @@ using dotnetmovieportal.Data;
 namespace dotnetmovieportal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221108093659_CreateInitial")]
-    partial class CreateInitial
+    [Migration("20221109102233_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

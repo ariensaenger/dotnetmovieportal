@@ -10,18 +10,20 @@ namespace dotnetmovieportal.Data
         // public DataContext(DbContextOptions options) : base(options){}
 
 
-        /// <summary>  
-        /// Initializes a new instance of the <see cref="EntityFrameworkSqlServerContext"/> class.  
-        /// </summary>  
-        /// <param name="options">The options.</param>  
+      
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
             // Creates the database !! Just for DEMO !! in production code you have to handle it differently!  
-            this.Database.EnsureCreated();
+            //this.Database.EnsureCreated();
         }
 
 
-        public DbSet<Movie> Movies { get; set; }    
+        public DbSet<Movie> Movies { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+        }
     }
 
     // Repository Methodes
